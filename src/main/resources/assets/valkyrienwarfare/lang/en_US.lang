@@ -1,4 +1,59 @@
+# Cannons!
+
+item.primer.name=Primer
+item.loader.name=Loader
+item.tuner.name=Tuner
+item.cannonball.name=Explosive Cannonball
+item.explosiveball.name=Highly Explosive Ball
+item.grapeshot.name=Grapeshot
+item.solidball.name=Solid Cannonball
+tile.cannon.name=Cannon
+tile.airmine.name=Air Mine
+
+# Valkyrien Warfare
+
+#Base
 tile.shipblock.name=Physics Infuser
 tile.shipblockcreative.name=Physics Infuser Creative
 
 itemGroup.valkyrienwarfare=Valkyrien Warfare
+
+#Combat
+item.basiccannonspawner.name=Turret
+item.turretcannonball.name=Turret Projectile
+item.powderpouch.name=Powder Pouch
+
+#Control
+item.systemlinker.name=System Linker
+item.airshipstealer.name=Airship Stealer
+item.relaywire.name=Relay Wire
+
+tile.shippilotschair.name=Piloting Chair
+tile.shippassengerchair.name=Passenger Chair
+tile.dopedetherium.name=Doped Etherium
+tile.balloonburner.name=Balloon Burner
+tile.basichovercraftcontroller.name=Basic Hovercraft Controller
+tile.thrustrelay.name=Thrust Relay
+tile.thrustmodulator.name=Thrust Modulator
+tile.shiphelm.name=Ship Helm
+tile.shiptelegraph.name=Ship Telegraph
+
+tile.basicengine.name=Basic Engine
+tile.advancedengine.name=Advanced Engine
+tile.eliteengine.name=Elite Engine
+tile.ultimateengine.name=Ultimate Engine
+tile.redstoneengine.name=Redstone Engine
+
+tile.antigravengine.name=Basic Ether Compressor
+tile.advancedethercompressor.name=Advanced Ether Compressor
+tile.eliteethercompressor.name=Elite Ether Compressor
+tile.ultimateethercompressor.name=Ultimate Ether Compressor
+tile.creativeethercompressor.name=Creative Ether Compressor
+
+#World
+item.etheriumcrystal.name=Etherium Crystal
+item.explosivearrow.name=Explosive Arrow
+
+tile.etheriumore.name=Etherium Ore
+tile.skydungeon_controller.name=SkyDungeon Controller
+tile.quartz_fence.name=Quartz Fence
