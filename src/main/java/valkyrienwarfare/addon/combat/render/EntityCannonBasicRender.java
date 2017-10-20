@@ -1,3 +1,18 @@
+/*
+ * Adapted from the Wizardry License
+ *
+ * Copyright (c) 2016-2017 the Valkyrien Warfare team
+ *
+ * Permission is hereby granted to any persons and/or organizations using this software to copy, modify, merge, publish, and distribute it.
+ * Said persons and/or organizations are not allowed to use the software or any derivatives of the work for commercial use or any other means to generate income unless it is to be used as a part of a larger project (IE: "modpacks"), nor are they allowed to claim this software as their own.
+ *
+ * The persons and/or organizations are also disallowed from sub-licensing and/or trademarking this software without explicit permission from the Valkyrien Warfare team.
+ *
+ * Any persons and/or organizations using this software must disclose their source code and have it publicly available, include this license, provide sufficient credit to the original authors of the project (IE: The Valkyrien Warfare team), as well as provide a link to the original project.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 package valkyrienwarfare.addon.combat.render;
 
 import valkyrienwarfare.addon.combat.entity.EntityCannonBasic;
@@ -6,7 +21,7 @@ import valkyrienwarfare.render.FastBlockModelRenderer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.VertexBuffer;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.texture.TextureMap;
@@ -36,11 +51,11 @@ public class EntityCannonBasicRender extends Render<EntityCannonBasic> {
 //		entity.posX += 15;
 
 		Tessellator tessellator = Tessellator.getInstance();
-		VertexBuffer vertexbuffer = tessellator.getBuffer();
+		BufferBuilder BufferBuilder = tessellator.getBuffer();
 
-		double oldX = vertexbuffer.xOffset;
-		double oldY = vertexbuffer.yOffset;
-		double oldZ = vertexbuffer.zOffset;
+		double oldX = BufferBuilder.xOffset;
+		double oldY = BufferBuilder.yOffset;
+		double oldZ = BufferBuilder.zOffset;
 
 		GL11.glPushMatrix();
 
@@ -51,7 +66,7 @@ public class EntityCannonBasicRender extends Render<EntityCannonBasic> {
 			GlStateManager.enableOutlineMode(this.getTeamColor(entity));
 		}
 
-		vertexbuffer.setTranslation(0, 0, 0);
+		BufferBuilder.setTranslation(0, 0, 0);
 
 		GL11.glTranslated(x, y, z);
 
@@ -81,7 +96,7 @@ public class EntityCannonBasicRender extends Render<EntityCannonBasic> {
 			GlStateManager.disableColorMaterial();
 		}
 
-		vertexbuffer.setTranslation(oldX, oldY, oldZ);
+		BufferBuilder.setTranslation(oldX, oldY, oldZ);
 		GlStateManager.disableLighting();
 		GlStateManager.resetColor();
 		GlStateManager.enableLighting();
@@ -93,19 +108,19 @@ public class EntityCannonBasicRender extends Render<EntityCannonBasic> {
 
 	private void renderBase(EntityCannonBasic entity, double x, double y, double z, float entityYaw, float partialTicks) {
 		Tessellator tessellator = Tessellator.getInstance();
-		VertexBuffer vertexbuffer = tessellator.getBuffer();
+		BufferBuilder BufferBuilder = tessellator.getBuffer();
 		GL11.glPushMatrix();
 		GL11.glTranslated(-0.5D, 0, -0.5D);
-		FastBlockModelRenderer.renderBlockModel(vertexbuffer, tessellator, entity.world, baseState, entity.getBrightnessForRender(partialTicks));
+		FastBlockModelRenderer.renderBlockModel(BufferBuilder, tessellator, entity.world, baseState, entity.getBrightnessForRender());
 		GL11.glPopMatrix();
 	}
 
 	private void renderHead(EntityCannonBasic entity, double x, double y, double z, float entityYaw, float partialTicks) {
 		Tessellator tessellator = Tessellator.getInstance();
-		VertexBuffer vertexbuffer = tessellator.getBuffer();
+		BufferBuilder BufferBuilder = tessellator.getBuffer();
 		GL11.glPushMatrix();
 		GL11.glTranslated(-0.5D, 0, -0.5D);
-		FastBlockModelRenderer.renderBlockModel(vertexbuffer, tessellator, entity.world, headState, entity.getBrightnessForRender(partialTicks));
+		FastBlockModelRenderer.renderBlockModel(BufferBuilder, tessellator, entity.world, headState, entity.getBrightnessForRender());
 		GL11.glPopMatrix();
 	}
 

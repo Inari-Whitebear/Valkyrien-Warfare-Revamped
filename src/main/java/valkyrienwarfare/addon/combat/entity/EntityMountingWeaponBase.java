@@ -1,3 +1,18 @@
+/*
+ * Adapted from the Wizardry License
+ *
+ * Copyright (c) 2016-2017 the Valkyrien Warfare team
+ *
+ * Permission is hereby granted to any persons and/or organizations using this software to copy, modify, merge, publish, and distribute it.
+ * Said persons and/or organizations are not allowed to use the software or any derivatives of the work for commercial use or any other means to generate income unless it is to be used as a part of a larger project (IE: "modpacks"), nor are they allowed to claim this software as their own.
+ *
+ * The persons and/or organizations are also disallowed from sub-licensing and/or trademarking this software without explicit permission from the Valkyrien Warfare team.
+ *
+ * Any persons and/or organizations using this software must disclose their source code and have it publicly available, include this license, provide sufficient credit to the original authors of the project (IE: The Valkyrien Warfare team), as well as provide a link to the original project.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 package valkyrienwarfare.addon.combat.entity;
 
 import valkyrienwarfare.api.RotationMatrices;
@@ -105,10 +120,10 @@ public abstract class EntityMountingWeaponBase extends Entity implements IEntity
 	//
 	// double speed = 2.5D;
 	//
-	// tnt.setPosition(posX+look.xCoord, posY+.6+look.yCoord, posZ+look.zCoord);
-	// tnt.motionX = look.xCoord*speed;
-	// tnt.motionY = look.yCoord*speed;
-	// tnt.motionZ = look.zCoord*speed;
+	// tnt.setPosition(posX+look.x, posY+.6+look.y, posZ+look.z);
+	// tnt.motionX = look.x*speed;
+	// tnt.motionY = look.y*speed;
+	// tnt.motionZ = look.z*speed;
 	// worldObj.spawnEntityInWorld(tnt);
 	// worldObj.playSoundAtEntity(tnt, "game.tnt.primed", 1.0F, 1.0F);
 	// delay=0;
@@ -136,9 +151,9 @@ public abstract class EntityMountingWeaponBase extends Entity implements IEntity
 	// if(fixedOn!=null){
 	// Vec3 pointingDirection = riddenByEntity.getLook(1.0F);
 	// pointingDirection = RotationMatrices.applyTransform(RotationMatrices.inverse(fixedOn.rotationTransform), pointingDirection);
-	// double newPitch = math.asin(pointingDirection.yCoord)* -180f/math.PI;
+	// double newPitch = math.asin(pointingDirection.y)* -180f/math.PI;
 	// float f4 = (float) -math.cos(-newPitch * 0.017453292F);
-	// double radianYaw = math.atan2((pointingDirection.xCoord/f4), (pointingDirection.zCoord/f4));
+	// double radianYaw = math.atan2((pointingDirection.x/f4), (pointingDirection.z/f4));
 	// radianYaw+=math.PI;
 	// radianYaw*= -180f/math.PI;
 	// rotationYaw = (float) radianYaw;
@@ -163,7 +178,6 @@ public abstract class EntityMountingWeaponBase extends Entity implements IEntity
 		Entity entity;
 
 		for (entity = this; entity.isRiding(); entity = entity.getRidingEntity()) {
-			;
 		}
 
 		return null;
@@ -241,7 +255,7 @@ public abstract class EntityMountingWeaponBase extends Entity implements IEntity
 
 	@Nullable
 	public Entity getRider() {
-		Entity entity = this.getPassengers().isEmpty() ? null : (Entity) this.getPassengers().get(0);
+		Entity entity = this.getPassengers().isEmpty() ? null : this.getPassengers().get(0);
 		return entity;
 	}
 
@@ -268,9 +282,9 @@ public abstract class EntityMountingWeaponBase extends Entity implements IEntity
 			if (this.isEntityInvulnerable(source)) {
 				return false;
 			} else {
-				this.setBeenAttacked();
+				this.markVelocityChanged();
 				this.setDamage(this.getDamage() + amount * 10.0F);
-				boolean flag = source.getEntity() instanceof EntityPlayer && ((EntityPlayer) source.getEntity()).capabilities.isCreativeMode;
+				boolean flag = source.getTrueSource() instanceof EntityPlayer && ((EntityPlayer) source.getTrueSource()).capabilities.isCreativeMode;
 
 				if (flag || this.getDamage() > getMaxDamage()) {
 					this.removePassengers();

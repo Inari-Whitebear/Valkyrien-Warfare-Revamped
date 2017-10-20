@@ -1,12 +1,20 @@
+/*
+ * Adapted from the Wizardry License
+ *
+ * Copyright (c) 2016-2017 the Valkyrien Warfare team
+ *
+ * Permission is hereby granted to any persons and/or organizations using this software to copy, modify, merge, publish, and distribute it.
+ * Said persons and/or organizations are not allowed to use the software or any derivatives of the work for commercial use or any other means to generate income unless it is to be used as a part of a larger project (IE: "modpacks"), nor are they allowed to claim this software as their own.
+ *
+ * The persons and/or organizations are also disallowed from sub-licensing and/or trademarking this software without explicit permission from the Valkyrien Warfare team.
+ *
+ * Any persons and/or organizations using this software must disclose their source code and have it publicly available, include this license, provide sufficient credit to the original authors of the project (IE: The Valkyrien Warfare team), as well as provide a link to the original project.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 package valkyrienwarfare.mixin.network;
 
-import valkyrienwarfare.api.RotationMatrices;
-import valkyrienwarfare.api.Vector;
-import valkyrienwarfare.interaction.EntityDraggable;
-import valkyrienwarfare.interaction.IDraggable;
-import valkyrienwarfare.interaction.PlayerDataBackup;
-import valkyrienwarfare.physicsmanagement.PhysicsWrapperEntity;
-import valkyrienwarfare.ValkyrienWarfareMod;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -26,6 +34,7 @@ import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
@@ -33,10 +42,17 @@ import net.minecraft.world.WorldServer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import valkyrienwarfare.ValkyrienWarfareMod;
+import valkyrienwarfare.api.RotationMatrices;
+import valkyrienwarfare.api.Vector;
+import valkyrienwarfare.interaction.EntityDraggable;
+import valkyrienwarfare.interaction.IDraggable;
+import valkyrienwarfare.interaction.PlayerDataBackup;
+import valkyrienwarfare.physicsmanagement.PhysicsWrapperEntity;
 
 @Mixin(NetHandlerPlayServer.class)
 public abstract class MixinNetHandlerPlayServer {
-
+	
 	public NetHandlerPlayServer thisClassAsAHandler = NetHandlerPlayServer.class.cast(this);
 	@Shadow
 	public EntityPlayerMP player;
@@ -55,7 +71,7 @@ public abstract class MixinNetHandlerPlayServer {
 	private double dummyBlockReachDist = 9999999999999999999999999999D;
 	private double lastGoodBlockReachDist;
 	private int ticksSinceLastTry = 0;
-
+	
 	@Overwrite
 	public void processTryUseItemOnBlock(CPacketPlayerTryUseItemOnBlock packetIn) {
 		PacketThreadUtil.checkThreadAndEnqueue(packetIn, NetHandlerPlayServer.class.cast(this), this.player.getServerWorld());
@@ -85,7 +101,7 @@ public abstract class MixinNetHandlerPlayServer {
 		}
 		player.interactionManager.setBlockReachDistance(lastGoodBlockReachDist);
 	}
-
+	
 	@Overwrite
 	public void processPlayerDigging(CPacketPlayerDigging packetIn) {
 		PacketThreadUtil.checkThreadAndEnqueue(packetIn, NetHandlerPlayServer.class.cast(this), this.player.getServerWorld());
@@ -109,7 +125,7 @@ public abstract class MixinNetHandlerPlayServer {
 		}
 		player.interactionManager.setBlockReachDistance(lastGoodBlockReachDist);
 	}
-
+	
 	@Overwrite
 	public void processUpdateSign(CPacketUpdateSign packetIn) {
 		PacketThreadUtil.checkThreadAndEnqueue(packetIn, NetHandlerPlayServer.class.cast(this), this.player.getServerWorld());
@@ -123,7 +139,7 @@ public abstract class MixinNetHandlerPlayServer {
 			player.interactionManager.setBlockReachDistance(dummyBlockReachDist);
 			ticksSinceLastTry = 0;
 		}
-
+		
 		if (wrapper != null && wrapper.wrapping.coordTransform != null) {
 			RotationMatrices.applyTransform(wrapper.wrapping.coordTransform.wToLTransform, wrapper.wrapping.coordTransform.wToLRotation, player);
 			processUpdateSignOriginal(packetIn);
@@ -134,15 +150,15 @@ public abstract class MixinNetHandlerPlayServer {
 		}
 		player.interactionManager.setBlockReachDistance(lastGoodBlockReachDist);
 	}
-
+	
 	public void processTryUseItemOnBlockOriginal(CPacketPlayerTryUseItemOnBlock packetIn) {
-		WorldServer worldserver = thisClassAsAHandler.serverController.worldServerForDimension(this.player.dimension);
+		WorldServer worldserver = thisClassAsAHandler.serverController.getWorld(this.player.dimension);
 		EnumHand enumhand = packetIn.getHand();
 		ItemStack itemstack = this.player.getHeldItem(enumhand);
 		BlockPos blockpos = packetIn.getPos();
 		EnumFacing enumfacing = packetIn.getDirection();
 		this.player.markPlayerActive();
-
+		
 		if (blockpos.getY() < thisClassAsAHandler.serverController.getBuildLimit() - 1 || enumfacing != EnumFacing.UP && blockpos.getY() < thisClassAsAHandler.serverController.getBuildLimit()) {
 			double dist = player.interactionManager.getBlockReachDistance() + 3;
 			dist *= dist;
@@ -161,47 +177,47 @@ public abstract class MixinNetHandlerPlayServer {
 //                }
 //
 //                System.out.println(playerHitVec);
-
+				
 				this.player.interactionManager.processRightClickBlock(this.player, worldserver, itemstack, enumhand, blockpos, enumfacing, (float) playerHitVec.X, (float) playerHitVec.Y, (float) playerHitVec.Z);
 			}
 		} else {
 			TextComponentTranslation textcomponenttranslation = new TextComponentTranslation("build.tooHigh", Integer.valueOf(thisClassAsAHandler.serverController.getBuildLimit()));
 			textcomponenttranslation.getStyle().setColor(TextFormatting.RED);
-			this.player.connection.sendPacket(new SPacketChat(textcomponenttranslation, (byte) 2));
+			this.player.connection.sendPacket(new SPacketChat(textcomponenttranslation, ChatType.GAME_INFO));
 		}
-
+		
 		this.player.connection.sendPacket(new SPacketBlockChange(worldserver, blockpos));
 		this.player.connection.sendPacket(new SPacketBlockChange(worldserver, blockpos.offset(enumfacing)));
 	}
-
+	
 	public void processPlayerDiggingOriginal(CPacketPlayerDigging packetIn) {
-		WorldServer worldserver = thisClassAsAHandler.serverController.worldServerForDimension(this.player.dimension);
+		WorldServer worldserver = thisClassAsAHandler.serverController.getWorld(this.player.dimension);
 		BlockPos blockpos = packetIn.getPosition();
 		this.player.markPlayerActive();
-
+		
 		switch (packetIn.getAction()) {
 			case SWAP_HELD_ITEMS:
-
+				
 				if (!this.player.isSpectator()) {
 					ItemStack itemstack = this.player.getHeldItem(EnumHand.OFF_HAND);
 					this.player.setHeldItem(EnumHand.OFF_HAND, this.player.getHeldItem(EnumHand.MAIN_HAND));
 					this.player.setHeldItem(EnumHand.MAIN_HAND, itemstack);
 				}
-
+				
 				return;
 			case DROP_ITEM:
-
+				
 				if (!this.player.isSpectator()) {
 					this.player.dropItem(false);
 				}
-
+				
 				return;
 			case DROP_ALL_ITEMS:
-
+				
 				if (!this.player.isSpectator()) {
 					this.player.dropItem(true);
 				}
-
+				
 				return;
 			case RELEASE_USE_ITEM:
 				this.player.stopActiveHand();
@@ -213,10 +229,10 @@ public abstract class MixinNetHandlerPlayServer {
 				double d1 = this.player.posY - ((double) blockpos.getY() + 0.5D) + 1.5D;
 				double d2 = this.player.posZ - ((double) blockpos.getZ() + 0.5D);
 				double d3 = d0 * d0 + d1 * d1 + d2 * d2;
-
+				
 				double dist = player.interactionManager.getBlockReachDistance() + 1;
 				dist *= dist;
-
+				
 				if (d3 > dist) {
 					return;
 				} else if (blockpos.getY() >= thisClassAsAHandler.serverController.getBuildLimit()) {
@@ -234,81 +250,81 @@ public abstract class MixinNetHandlerPlayServer {
 						} else if (packetIn.getAction() == CPacketPlayerDigging.Action.ABORT_DESTROY_BLOCK) {
 							this.player.interactionManager.cancelDestroyingBlock();
 						}
-
+						
 						if (worldserver.getBlockState(blockpos).getMaterial() != Material.AIR) {
 							this.player.connection.sendPacket(new SPacketBlockChange(worldserver, blockpos));
 						}
 					}
-
+					
 					return;
 				}
-
+			
 			default:
 				throw new IllegalArgumentException("Invalid player action");
 		}
 	}
-
+	
 	public void processUpdateSignOriginal(CPacketUpdateSign packetIn) {
 		this.player.markPlayerActive();
-		WorldServer worldserver = thisClassAsAHandler.serverController.worldServerForDimension(this.player.dimension);
+		WorldServer worldserver = thisClassAsAHandler.serverController.getWorld(this.player.dimension);
 		BlockPos blockpos = packetIn.getPosition();
-
+		
 		if (worldserver.isBlockLoaded(blockpos)) {
 			IBlockState iblockstate = worldserver.getBlockState(blockpos);
 			TileEntity tileentity = worldserver.getTileEntity(blockpos);
-
+			
 			if (!(tileentity instanceof TileEntitySign)) {
 				return;
 			}
-
+			
 			TileEntitySign tileentitysign = (TileEntitySign) tileentity;
-
+			
 			if (!tileentitysign.getIsEditable() || tileentitysign.getPlayer() != this.player) {
 				thisClassAsAHandler.serverController.logWarning("Player " + this.player.getName() + " just tried to change non-editable sign");
 				return;
 			}
-
+			
 			String[] astring = packetIn.getLines();
-
+			
 			for (int i = 0; i < astring.length; ++i) {
 				tileentitysign.signText[i] = new TextComponentString(TextFormatting.getTextWithoutFormattingCodes(astring[i]));
 			}
-
+			
 			tileentitysign.markDirty();
 			worldserver.notifyBlockUpdate(blockpos, iblockstate, iblockstate, 3);
 		}
 	}
-
+	
 	@Overwrite
 	public void update() {
 		IDraggable draggable = EntityDraggable.getDraggableFromEntity(player);
 		captureCurrentPosition();
-
+		
 		this.firstGoodX += draggable.getVelocityAddedToPlayer().X;
 		this.firstGoodY += draggable.getVelocityAddedToPlayer().Y;
 		this.firstGoodZ += draggable.getVelocityAddedToPlayer().Z;
 		this.lastGoodX += draggable.getVelocityAddedToPlayer().X;
 		this.lastGoodY += draggable.getVelocityAddedToPlayer().Y;
 		this.lastGoodZ += draggable.getVelocityAddedToPlayer().Z;
-
+		
 		this.player.onUpdateEntity();
 		this.player.setPositionAndRotation(thisClassAsAHandler.firstGoodX, thisClassAsAHandler.firstGoodY, thisClassAsAHandler.firstGoodZ, this.player.rotationYaw, this.player.rotationPitch);
 		++thisClassAsAHandler.networkTickCount;
 		thisClassAsAHandler.lastMovePacketCounter = thisClassAsAHandler.movePacketCounter;
-
+		
 		if (thisClassAsAHandler.floating) {
 			if (++thisClassAsAHandler.floatingTickCount > 80) {
 				NetHandlerPlayServer.LOGGER.warn("{} was kicked for floating too long!", this.player.getName());
-				thisClassAsAHandler.disconnect("Flying is not enabled on this server");
+				thisClassAsAHandler.disconnect(new TextComponentString("Flying is not enabled on this server"));
 				return;
 			}
 		} else {
 			thisClassAsAHandler.floating = false;
 			thisClassAsAHandler.floatingTickCount = 0;
 		}
-
+		
 		thisClassAsAHandler.lowestRiddenEnt = this.player.getLowestRidingEntity();
-
+		
 		if (thisClassAsAHandler.lowestRiddenEnt != thisClassAsAHandler.player && thisClassAsAHandler.lowestRiddenEnt.getControllingPassenger() == thisClassAsAHandler.player) {
 			thisClassAsAHandler.lowestRiddenX = thisClassAsAHandler.lowestRiddenEnt.posX;
 			thisClassAsAHandler.lowestRiddenY = thisClassAsAHandler.lowestRiddenEnt.posY;
@@ -316,11 +332,11 @@ public abstract class MixinNetHandlerPlayServer {
 			thisClassAsAHandler.lowestRiddenX1 = thisClassAsAHandler.lowestRiddenEnt.posX;
 			thisClassAsAHandler.lowestRiddenY1 = thisClassAsAHandler.lowestRiddenEnt.posY;
 			thisClassAsAHandler.lowestRiddenZ1 = thisClassAsAHandler.lowestRiddenEnt.posZ;
-
+			
 			if (thisClassAsAHandler.vehicleFloating && thisClassAsAHandler.player.getLowestRidingEntity().getControllingPassenger() == thisClassAsAHandler.player) {
 				if (++thisClassAsAHandler.vehicleFloatingTickCount > 80) {
 					NetHandlerPlayServer.LOGGER.warn("{} was kicked for floating a vehicle too long!", thisClassAsAHandler.player.getName());
-					thisClassAsAHandler.disconnect("Flying is not enabled on this server");
+					thisClassAsAHandler.disconnect(new TextComponentString("Flying is not enabled on this server"));
 					return;
 				}
 			} else {
@@ -332,35 +348,39 @@ public abstract class MixinNetHandlerPlayServer {
 			thisClassAsAHandler.vehicleFloating = false;
 			thisClassAsAHandler.vehicleFloatingTickCount = 0;
 		}
-
+		
 		thisClassAsAHandler.serverController.profiler.startSection("keepAlive");
-
-		if ((long) thisClassAsAHandler.networkTickCount - thisClassAsAHandler.lastSentPingPacket > 40L) {
-			thisClassAsAHandler.lastSentPingPacket = (long) thisClassAsAHandler.networkTickCount;
-			thisClassAsAHandler.lastPingTime = currentTimeMillis();
-			thisClassAsAHandler.keepAliveId = (int) thisClassAsAHandler.lastPingTime;
-			thisClassAsAHandler.sendPacket(new SPacketKeepAlive(thisClassAsAHandler.keepAliveId));
+		long i = this.currentTimeMillis();
+		if (i - thisClassAsAHandler.field_194402_f >= 15000L) {
+			if (thisClassAsAHandler.field_194403_g) {
+				thisClassAsAHandler.disconnect(new TextComponentTranslation("disconnect.timeout"));
+			} else {
+				thisClassAsAHandler.field_194403_g = true;
+				thisClassAsAHandler.field_194402_f = i;
+				thisClassAsAHandler.field_194404_h = i;
+				thisClassAsAHandler.sendPacket(new SPacketKeepAlive(thisClassAsAHandler.field_194404_h));
+			}
 		}
-
+		
 		thisClassAsAHandler.serverController.profiler.endSection();
-
+		
 		if (thisClassAsAHandler.chatSpamThresholdCount > 0) {
 			--thisClassAsAHandler.chatSpamThresholdCount;
 		}
-
+		
 		if (thisClassAsAHandler.itemDropThreshold > 0) {
 			--thisClassAsAHandler.itemDropThreshold;
 		}
-
+		
 		if (thisClassAsAHandler.player.getLastActiveTime() > 0L && thisClassAsAHandler.serverController.getMaxPlayerIdleMinutes() > 0 && MinecraftServer.getCurrentTimeMillis() - thisClassAsAHandler.player.getLastActiveTime() > (long) (thisClassAsAHandler.serverController.getMaxPlayerIdleMinutes() * 1000 * 60)) {
-			thisClassAsAHandler.disconnect("You have been idle for too long!");
+			thisClassAsAHandler.disconnect(new TextComponentString("You have been idle for too long!"));
 		}
 	}
-
+	
 	@Shadow
 	abstract long currentTimeMillis();
-
+	
 	@Shadow
 	abstract void captureCurrentPosition();
-
+	
 }

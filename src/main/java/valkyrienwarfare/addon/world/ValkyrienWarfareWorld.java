@@ -1,5 +1,21 @@
+/*
+ * Adapted from the Wizardry License
+ *
+ * Copyright (c) 2016-2017 the Valkyrien Warfare team
+ *
+ * Permission is hereby granted to any persons and/or organizations using this software to copy, modify, merge, publish, and distribute it.
+ * Said persons and/or organizations are not allowed to use the software or any derivatives of the work for commercial use or any other means to generate income unless it is to be used as a part of a larger project (IE: "modpacks"), nor are they allowed to claim this software as their own.
+ *
+ * The persons and/or organizations are also disallowed from sub-licensing and/or trademarking this software without explicit permission from the Valkyrien Warfare team.
+ *
+ * Any persons and/or organizations using this software must disclose their source code and have it publicly available, include this license, provide sufficient credit to the original authors of the project (IE: The Valkyrien Warfare team), as well as provide a link to the original project.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 package valkyrienwarfare.addon.world;
 
+import net.minecraftforge.event.RegistryEvent;
 import valkyrienwarfare.addon.world.block.BlockEtheriumOre;
 import valkyrienwarfare.addon.world.block.BlockQuartzFence;
 import valkyrienwarfare.addon.world.proxy.ClientProxyWorld;
@@ -21,10 +37,10 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 import valkyrienwarfare.api.addons.VWAddon;
 
 @VWAddon
-public class ValkyrienWarfareWorld extends Module<ValkyrienWarfareWorldGen> {
+public class ValkyrienWarfareWorld extends Module<ValkyrienWarfareWorld> {
 	
 	public ValkyrienWarfareWorld()   {
-		super("VW_World", new CommonProxyWorld(), new ClientProxyWorld(), null, "valkyrienwarfareworld");
+		super("VW_World", new CommonProxyWorld(), new ClientProxyWorld(), null);
 		INSTANCE = this;
 	}
 	private static final WorldEventsCommon worldEventsCommon = new WorldEventsCommon();
@@ -34,12 +50,17 @@ public class ValkyrienWarfareWorld extends Module<ValkyrienWarfareWorldGen> {
 	public Block quartz_fence;
 	public Item etheriumCrystal;
 
-	private static void registerItemBlock(Block block) {
-		GameRegistry.register(new ItemBlock(block).setRegistryName(block.getRegistryName()));
+	private static void registerItemBlock(Block block, RegistryEvent.Register<Item> event) {
+		event.getRegistry().register(new ItemBlock(block).setUnlocalizedName(block.getUnlocalizedName()).setRegistryName(block.getRegistryName()));
 	}
 
 	@Override
 	public void preInit(FMLStateEvent event) {
+		etheriumOre = new BlockEtheriumOre(Material.ROCK).setHardness(3f).setUnlocalizedName("etheriumore").setRegistryName(getModID(), "etheriumore").setCreativeTab(ValkyrienWarfareMod.vwTab);
+		skydungeon_controller = new BlockSkyTempleController(Material.GLASS).setHardness(15f).setUnlocalizedName("skydungeon_controller").setRegistryName(getModID(), "skydungeon_controller").setCreativeTab(ValkyrienWarfareMod.vwTab);
+		quartz_fence = new BlockQuartzFence(Material.GLASS).setHardness(8f).setUnlocalizedName("quartz_fence").setRegistryName(getModID(), "quartz_fence").setCreativeTab(ValkyrienWarfareMod.vwTab);
+		
+		etheriumCrystal = new ItemEtheriumCrystal().setUnlocalizedName("etheriumcrystal").setRegistryName(getModID(), "etheriumcrystal").setCreativeTab(ValkyrienWarfareMod.vwTab).setMaxStackSize(16);
 	}
 
 	@Override
@@ -55,30 +76,21 @@ public class ValkyrienWarfareWorld extends Module<ValkyrienWarfareWorldGen> {
 	}
 	
 	@Override
-	protected void registerBlocks() {
-		etheriumOre = new BlockEtheriumOre(Material.ROCK).setHardness(3f).setUnlocalizedName("etheriumore").setRegistryName(getModID(), "etheriumore").setCreativeTab(ValkyrienWarfareMod.vwTab);
-		skydungeon_controller = new BlockSkyTempleController(Material.GLASS).setHardness(15f).setUnlocalizedName("skydungeon_controller").setRegistryName(getModID(), "skydungeon_controller").setCreativeTab(ValkyrienWarfareMod.vwTab);
-		quartz_fence = new BlockQuartzFence(Material.GLASS).setHardness(8f).setUnlocalizedName("quartz_fence").setRegistryName(getModID(), "quartz_fence").setCreativeTab(ValkyrienWarfareMod.vwTab);
-
-		GameRegistry.register(etheriumOre);
-		GameRegistry.register(skydungeon_controller);
-		GameRegistry.register(quartz_fence);
-
-		registerItemBlock(etheriumOre);
-		registerItemBlock(skydungeon_controller);
-		registerItemBlock(quartz_fence);
+	public void registerBlocks(RegistryEvent.Register<Block> event) {
+		event.getRegistry().registerAll(etheriumOre, skydungeon_controller, quartz_fence);
 	}
 	
 	@Override
-	protected void registerItems() {
-		etheriumCrystal = new ItemEtheriumCrystal().setUnlocalizedName("etheriumcrystal").setRegistryName(getModID(), "etheriumcrystal").setCreativeTab(ValkyrienWarfareMod.vwTab).setMaxStackSize(16);
-
-		GameRegistry.register(etheriumCrystal);
+	public void registerItems(RegistryEvent.Register<Item> event) {
+		event.getRegistry().registerAll(etheriumCrystal);
+		
+		registerItemBlock(etheriumOre, event);
+		registerItemBlock(skydungeon_controller, event);
+		registerItemBlock(quartz_fence, event);
 	}
 	
 	@Override
 	protected void registerTileEntities() {
 		GameRegistry.registerTileEntity(TileEntitySkyTempleController.class, "skydungeon_controller");
 	}
-
 }

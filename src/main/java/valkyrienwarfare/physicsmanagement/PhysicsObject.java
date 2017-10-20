@@ -1,3 +1,18 @@
+/*
+ * Adapted from the Wizardry License
+ *
+ * Copyright (c) 2016-2017 the Valkyrien Warfare team
+ *
+ * Permission is hereby granted to any persons and/or organizations using this software to copy, modify, merge, publish, and distribute it.
+ * Said persons and/or organizations are not allowed to use the software or any derivatives of the work for commercial use or any other means to generate income unless it is to be used as a part of a larger project (IE: "modpacks"), nor are they allowed to claim this software as their own.
+ *
+ * The persons and/or organizations are also disallowed from sub-licensing and/or trademarking this software without explicit permission from the Valkyrien Warfare team.
+ *
+ * Any persons and/or organizations using this software must disclose their source code and have it publicly available, include this license, provide sufficient credit to the original authors of the project (IE: The Valkyrien Warfare team), as well as provide a link to the original project.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 package valkyrienwarfare.physicsmanagement;
 
 import valkyrienwarfare.api.block.ethercompressor.TileEntityEtherCompressor;
@@ -214,7 +229,7 @@ public class PhysicsObject {
 			for (int x = ownedChunks.minX; x <= ownedChunks.maxX; x++) {
 				for (int z = ownedChunks.minZ; z <= ownedChunks.maxZ; z++) {
 					SPacketUnloadChunk unloadPacket = new SPacketUnloadChunk(x, z);
-					((EntityPlayerMP) wachingPlayer).connection.sendPacket(unloadPacket);
+					wachingPlayer.connection.sendPacket(unloadPacket);
 				}
 			}
 			// NOTICE: This method isnt being called to avoid the watchingPlayers.remove(player) call, which is a waste of CPU time
@@ -331,7 +346,7 @@ public class PhysicsObject {
 		
 		while (iter.hasNext()) {
 			int i = iter.next();
-			detector.setPosWithRespectTo(i, BlockPos.ORIGIN, pos);
+			SpatialDetector.setPosWithRespectTo(i, BlockPos.ORIGIN, pos);
 			
 			int xRad = Math.abs(pos.getX() >> 4);
 			int zRad = Math.abs(pos.getZ() >> 4);
@@ -378,7 +393,7 @@ public class PhysicsObject {
 		BlockPos centerDifference = refrenceBlockPos.subtract(centerInWorld);
 		while (iter.hasNext()) {
 			int i = iter.next();
-			detector.setPosWithRespectTo(i, centerInWorld, pos);
+			SpatialDetector.setPosWithRespectTo(i, centerInWorld, pos);
 			
 			IBlockState state = detector.cache.getBlockState(pos);
 			
@@ -390,7 +405,7 @@ public class PhysicsObject {
 			Chunk chunkToSet = claimedChunks[(pos.getX() >> 4) - minChunkX][(pos.getZ() >> 4) - minChunkZ];
 			int storageIndex = pos.getY() >> 4;
 			
-			if (chunkToSet.storageArrays[storageIndex] == chunkToSet.NULL_BLOCK_STORAGE) {
+			if (chunkToSet.storageArrays[storageIndex] == Chunk.NULL_BLOCK_STORAGE) {
 				chunkToSet.storageArrays[storageIndex] = new ExtendedBlockStorage(storageIndex << 4, true);
 			}
 			
@@ -438,7 +453,7 @@ public class PhysicsObject {
 						if (o != null) {
 							if (o instanceof BlockPos) {
 								BlockPos inTilePos = (BlockPos) o;
-								int hash = detector.getHashWithRespectTo(inTilePos.getX(), inTilePos.getY(), inTilePos.getZ(), detector.firstBlock);
+								int hash = SpatialDetector.getHashWithRespectTo(inTilePos.getX(), inTilePos.getY(), inTilePos.getZ(), detector.firstBlock);
 								if (detector.foundSet.contains(hash)) {
 									if (!(o instanceof MutableBlockPos)) {
 										inTilePos = inTilePos.add(centerDifference.getX(), centerDifference.getY(), centerDifference.getZ());
@@ -478,7 +493,7 @@ public class PhysicsObject {
 		while (iter.hasNext()) {
 			int i = iter.next();
 			// BlockPos respectTo = detector.getPosWithRespectTo(i, centerInWorld);
-			detector.setPosWithRespectTo(i, centerInWorld, pos);
+			SpatialDetector.setPosWithRespectTo(i, centerInWorld, pos);
 			// detector.cache.setBlockState(pos, Blocks.air.getDefaultState());
 			// TODO: Get this to update on clientside as well, you bastard!
 			TileEntity tile = worldObj.getTileEntity(pos);
@@ -517,8 +532,8 @@ public class PhysicsObject {
 	public void injectChunkIntoWorld(Chunk chunk, int x, int z, boolean putInId2ChunkMap) {
 		ChunkProviderServer provider = (ChunkProviderServer) worldObj.getChunkProvider();
 		//TileEntities will break if you don't do this
-		chunk.isChunkLoaded = true;
-		chunk.isModified = true;
+		chunk.loaded = true;
+		chunk.setModified(true);
 		claimedChunks[x - ownedChunks.minX][z - ownedChunks.minZ] = chunk;
 		
 		if (putInId2ChunkMap) {
@@ -535,7 +550,7 @@ public class PhysicsObject {
 //		    }
 		};
 		
-		long i = map.getIndex(x, z);
+		long i = PlayerChunkMap.getIndex(x, z);
 		
 		map.entryMap.put(i, entry);
 		map.entries.add(entry);
@@ -563,7 +578,7 @@ public class PhysicsObject {
 					//This is satisfied for the chunks surrounding a Ship, do fill it with empty space
 					Chunk chunk = new Chunk(worldObj, x, z);
 					ChunkProviderServer provider = (ChunkProviderServer) worldObj.getChunkProvider();
-					chunk.isModified = true;
+					chunk.setModified(true);
 					provider.id2ChunkMap.put(ChunkPos.asLong(x, z), chunk);
 				}
 			}
@@ -746,7 +761,7 @@ public class PhysicsObject {
 				if (!worldObj.isRemote) {
 					injectChunkIntoWorld(chunk, x, z, false);
 				}
-				for (Entry<BlockPos, TileEntity> entry : chunk.chunkTileEntityMap.entrySet()) {
+				for (Entry<BlockPos, TileEntity> entry : chunk.tileEntities.entrySet()) {
 					TileEntity tile = entry.getValue();
 					if (tile instanceof INodeProvider) {
 						nodeTileEntitiesToUpdate.add(tile);
@@ -843,8 +858,6 @@ public class PhysicsObject {
 	/**
 	 * ONLY USE THESE 2 METHODS TO EVER ADD/REMOVE ENTITIES, OTHERWISE YOU'LL RUIN EVERYTHING!
 	 *
-	 * @param toFix
-	 * @param posInLocal
 	 */
 	public void unFixEntity(Entity toUnfix) {
 		EntityFixMessage entityUnfixingMessage = new EntityFixMessage(wrapper, toUnfix, false, null);

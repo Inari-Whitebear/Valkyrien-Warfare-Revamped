@@ -1,3 +1,18 @@
+/*
+ * Adapted from the Wizardry License
+ *
+ * Copyright (c) 2016-2017 the Valkyrien Warfare team
+ *
+ * Permission is hereby granted to any persons and/or organizations using this software to copy, modify, merge, publish, and distribute it.
+ * Said persons and/or organizations are not allowed to use the software or any derivatives of the work for commercial use or any other means to generate income unless it is to be used as a part of a larger project (IE: "modpacks"), nor are they allowed to claim this software as their own.
+ *
+ * The persons and/or organizations are also disallowed from sub-licensing and/or trademarking this software without explicit permission from the Valkyrien Warfare team.
+ *
+ * Any persons and/or organizations using this software must disclose their source code and have it publicly available, include this license, provide sufficient credit to the original authors of the project (IE: The Valkyrien Warfare team), as well as provide a link to the original project.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 package valkyrienwarfare.addon.control.gui;
 
 import valkyrienwarfare.ValkyrienWarfareMod;
@@ -11,7 +26,7 @@ import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.VertexBuffer;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
@@ -120,11 +135,11 @@ public class HovercraftControllerGUI extends GuiContainer {
 		// drawBackground(par1);
 		drawGuiContainerBackgroundLayer(par3, par1, par2);
 		for (int i = 0; i < this.buttonList.size(); ++i) {
-			((GuiButton) this.buttonList.get(i)).drawButton(this.mc, par1, par2);
+			this.buttonList.get(i).drawButton(this.mc, par1, par2, par3);
 		}
 
 		for (int j = 0; j < this.labelList.size(); ++j) {
-			((GuiLabel) this.labelList.get(j)).drawLabel(this.mc, par1, par2);
+			this.labelList.get(j).drawLabel(this.mc, par1, par2);
 		}
 		for (GuiTextField text : textFields) {
 			text.drawTextBox();
@@ -154,7 +169,7 @@ public class HovercraftControllerGUI extends GuiContainer {
 		GlStateManager.disableLighting();
 		GlStateManager.disableFog();
 		Tessellator tessellator = Tessellator.getInstance();
-		VertexBuffer worldrenderer = tessellator.getBuffer();
+		BufferBuilder worldrenderer = tessellator.getBuffer();
 		this.mc.getTextureManager().bindTexture(background);
 		GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
 		float f = 32.0F;

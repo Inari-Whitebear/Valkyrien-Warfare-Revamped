@@ -1,3 +1,18 @@
+/*
+ * Adapted from the Wizardry License
+ *
+ * Copyright (c) 2016-2017 the Valkyrien Warfare team
+ *
+ * Permission is hereby granted to any persons and/or organizations using this software to copy, modify, merge, publish, and distribute it.
+ * Said persons and/or organizations are not allowed to use the software or any derivatives of the work for commercial use or any other means to generate income unless it is to be used as a part of a larger project (IE: "modpacks"), nor are they allowed to claim this software as their own.
+ *
+ * The persons and/or organizations are also disallowed from sub-licensing and/or trademarking this software without explicit permission from the Valkyrien Warfare team.
+ *
+ * Any persons and/or organizations using this software must disclose their source code and have it publicly available, include this license, provide sufficient credit to the original authors of the project (IE: The Valkyrien Warfare team), as well as provide a link to the original project.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 package valkyrienwarfare.mixin.entity;
 
 import valkyrienwarfare.api.RotationMatrices;
@@ -97,25 +112,25 @@ public abstract class MixinEntityIntrinsic {
 			if (type == MoverType.PISTON) {
 				long i = this.world.getTotalWorldTime();
 
-				if (i != thisClassAsAnEntity.field_191506_aJ) {
-					Arrays.fill(thisClassAsAnEntity.field_191505_aI, 0.0D);
-					thisClassAsAnEntity.field_191506_aJ = i;
+				if (i != thisClassAsAnEntity.pistonDeltasGameTime) {
+					Arrays.fill(thisClassAsAnEntity.pistonDeltas, 0.0D);
+					thisClassAsAnEntity.pistonDeltasGameTime = i;
 				}
 
 				if (x != 0.0D) {
 					int j = EnumFacing.Axis.X.ordinal();
-					double d0 = MathHelper.clamp(x + thisClassAsAnEntity.field_191505_aI[j], -0.51D, 0.51D);
-					x = d0 - thisClassAsAnEntity.field_191505_aI[j];
-					thisClassAsAnEntity.field_191505_aI[j] = d0;
+					double d0 = MathHelper.clamp(x + thisClassAsAnEntity.pistonDeltas[j], -0.51D, 0.51D);
+					x = d0 - thisClassAsAnEntity.pistonDeltas[j];
+					thisClassAsAnEntity.pistonDeltas[j] = d0;
 
 					if (Math.abs(x) <= 9.999999747378752E-6D) {
 						return;
 					}
 				} else if (y != 0.0D) {
 					int l4 = EnumFacing.Axis.Y.ordinal();
-					double d12 = MathHelper.clamp(y + thisClassAsAnEntity.field_191505_aI[l4], -0.51D, 0.51D);
-					y = d12 - thisClassAsAnEntity.field_191505_aI[l4];
-					thisClassAsAnEntity.field_191505_aI[l4] = d12;
+					double d12 = MathHelper.clamp(y + thisClassAsAnEntity.pistonDeltas[l4], -0.51D, 0.51D);
+					y = d12 - thisClassAsAnEntity.pistonDeltas[l4];
+					thisClassAsAnEntity.pistonDeltas[l4] = d12;
 
 					if (Math.abs(y) <= 9.999999747378752E-6D) {
 						return;
@@ -126,9 +141,9 @@ public abstract class MixinEntityIntrinsic {
 					}
 
 					int i5 = EnumFacing.Axis.Z.ordinal();
-					double d13 = MathHelper.clamp(z + thisClassAsAnEntity.field_191505_aI[i5], -0.51D, 0.51D);
-					z = d13 - thisClassAsAnEntity.field_191505_aI[i5];
-					thisClassAsAnEntity.field_191505_aI[i5] = d13;
+					double d13 = MathHelper.clamp(z + thisClassAsAnEntity.pistonDeltas[i5], -0.51D, 0.51D);
+					z = d13 - thisClassAsAnEntity.pistonDeltas[i5];
+					thisClassAsAnEntity.pistonDeltas[i5] = d13;
 
 					if (Math.abs(z) <= 9.999999747378752E-6D) {
 						return;
@@ -197,7 +212,7 @@ public abstract class MixinEntityIntrinsic {
 				}
 			}
 
-			List<AxisAlignedBB> list1 = this.world.getCollisionBoxes(thisClassAsAnEntity, thisClassAsAnEntity.getEntityBoundingBox().addCoord(x, y, z));
+			List<AxisAlignedBB> list1 = this.world.getCollisionBoxes(thisClassAsAnEntity, thisClassAsAnEntity.getEntityBoundingBox().offset(x, y, z));
 			AxisAlignedBB axisalignedbb = thisClassAsAnEntity.getEntityBoundingBox();
 
 			if (y != 0.0D) {
@@ -243,9 +258,9 @@ public abstract class MixinEntityIntrinsic {
 				AxisAlignedBB axisalignedbb1 = thisClassAsAnEntity.getEntityBoundingBox();
 				thisClassAsAnEntity.setEntityBoundingBox(axisalignedbb);
 				y = (double) thisClassAsAnEntity.stepHeight;
-				List<AxisAlignedBB> list = this.world.getCollisionBoxes(thisClassAsAnEntity, thisClassAsAnEntity.getEntityBoundingBox().addCoord(d2, y, d4));
+				List<AxisAlignedBB> list = this.world.getCollisionBoxes(thisClassAsAnEntity, thisClassAsAnEntity.getEntityBoundingBox().offset(d2, y, d4));
 				AxisAlignedBB axisalignedbb2 = thisClassAsAnEntity.getEntityBoundingBox();
-				AxisAlignedBB axisalignedbb3 = axisalignedbb2.addCoord(d2, 0.0D, d4);
+				AxisAlignedBB axisalignedbb3 = axisalignedbb2.offset(d2, 0.0D, d4);
 				double d8 = y;
 				int j1 = 0;
 
@@ -329,10 +344,10 @@ public abstract class MixinEntityIntrinsic {
 			this.world.profiler.endSection();
 			this.world.profiler.startSection("rest");
 			thisClassAsAnEntity.resetPositionToBB();
-			thisClassAsAnEntity.isCollidedHorizontally = d2 != x || d4 != z;
-			thisClassAsAnEntity.isCollidedVertically = d3 != y;
-			thisClassAsAnEntity.onGround = thisClassAsAnEntity.isCollidedVertically && d3 < 0.0D;
-			thisClassAsAnEntity.isCollided = thisClassAsAnEntity.isCollidedHorizontally || thisClassAsAnEntity.isCollidedVertically;
+			thisClassAsAnEntity.collidedHorizontally = d2 != x || d4 != z;
+			thisClassAsAnEntity.collidedVertically = d3 != y;
+			thisClassAsAnEntity.onGround = thisClassAsAnEntity.collidedVertically && d3 < 0.0D;
+			thisClassAsAnEntity.collided = thisClassAsAnEntity.collidedHorizontally || thisClassAsAnEntity.collidedVertically;
 			int j6 = MathHelper.floor(this.posX);
 			int i1 = MathHelper.floor(this.posY - 0.20000000298023224D);
 			int k6 = MathHelper.floor(this.posZ);
@@ -412,7 +427,7 @@ public abstract class MixinEntityIntrinsic {
 
 			boolean flag1 = thisClassAsAnEntity.isWet();
 
-			if (this.world.isFlammableWithin(thisClassAsAnEntity.getEntityBoundingBox().contract(0.001D))) {
+			if (this.world.isFlammableWithin(thisClassAsAnEntity.getEntityBoundingBox().contract(0.001D, 0.001D, 0.001D))) {
 				dealFireDamage(1);
 
 				if (!flag1) {

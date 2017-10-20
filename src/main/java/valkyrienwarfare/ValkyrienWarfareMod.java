@@ -1,3 +1,18 @@
+/*
+ * Adapted from the Wizardry License
+ *
+ * Copyright (c) 2016-2017 the Valkyrien Warfare team
+ *
+ * Permission is hereby granted to any persons and/or organizations using this software to copy, modify, merge, publish, and distribute it.
+ * Said persons and/or organizations are not allowed to use the software or any derivatives of the work for commercial use or any other means to generate income unless it is to be used as a part of a larger project (IE: "modpacks"), nor are they allowed to claim this software as their own.
+ *
+ * The persons and/or organizations are also disallowed from sub-licensing and/or trademarking this software without explicit permission from the Valkyrien Warfare team.
+ *
+ * Any persons and/or organizations using this software must disclose their source code and have it publicly available, include this license, provide sufficient credit to the original authors of the project (IE: The Valkyrien Warfare team), as well as provide a link to the original project.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 package valkyrienwarfare;
 
 import valkyrienwarfare.api.addons.Module;
@@ -167,15 +182,6 @@ public class ValkyrienWarfareMod {
 		}
 	}
 	
-	public static void registerBlock(Block block) {
-		GameRegistry.register(block);
-		registerItemBlock(block);
-	}
-	
-	public static void registerItemBlock(Block block) {
-		GameRegistry.register(new ItemBlock(block).setRegistryName(block.getRegistryName()));
-	}
-	
 	public static void registerAddon(Module module) {
 		if (hasAddonRegistrationEnded) {
 			throw new IllegalStateException("Attempting to register addon after FMLConstructionEvent");
@@ -200,7 +206,7 @@ public class ValkyrienWarfareMod {
 				}
 			}
 			if (rootDir) { //assume root directory
-				defaultAddons = new File(f.getPath() + File.separatorChar + "build" + File.separatorChar + "resources" + File.separatorChar + "main" + File.separatorChar + "vwAddon_default");
+				defaultAddons = new File(f.getPath() + File.separatorChar + "src" + File.separatorChar + "main" + File.separatorChar + "resources" + File.separatorChar + "vwAddon_default");
 			} else { //assume run/ directory or similar
 				defaultAddons = new File(f.getAbsoluteFile().getParentFile().getParent() + File.separatorChar + "build" + File.separatorChar + "resources" + File.separatorChar + "main" + File.separatorChar + "vwAddon_default");
 			}
@@ -269,9 +275,10 @@ public class ValkyrienWarfareMod {
 	public void preInit(FMLPreInitializationEvent event) {
 		hasAddonRegistrationEnded = true;
 		
+		physicsInfuser = new BlockPhysicsInfuser(Material.ROCK).setHardness(12f).setUnlocalizedName("shipblock").setRegistryName(MODID, "shipblock").setCreativeTab(vwTab);
+		physicsInfuserCreative = new BlockPhysicsInfuserCreative(Material.ROCK).setHardness(12f).setUnlocalizedName("shipblockcreative").setRegistryName(MODID, "shipblockcreative").setCreativeTab(vwTab);
+		
 		proxy.preInit(event);
-		registerBlocks(event);
-		registerRecipies(event);
 		registerNetworks(event);
 		runConfiguration(event);
 		registerCapibilities();
@@ -303,7 +310,6 @@ public class ValkyrienWarfareMod {
 		BlockPhysicsRegistration.registerCustomBlockMasses();
 		BlockPhysicsRegistration.registerVanillaBlockForces();
 		BlockPhysicsRegistration.registerBlocksToNotPhysicise();
-		
 		
 		ForgeChunkManager.setForcedChunkLoadingCallback(INSTANCE, new VWChunkLoadingCallback());
 		////We're stealing these tickets bois!////
@@ -345,16 +351,8 @@ public class ValkyrienWarfareMod {
 		physWrapperNetwork.registerMessage(EntityRelativePositionMessageHandler.class, EntityRelativePositionMessage.class, 2, Side.CLIENT);
 	}
 	
-	private void registerBlocks(FMLStateEvent event) {
-		physicsInfuser = new BlockPhysicsInfuser(Material.ROCK).setHardness(12f).setUnlocalizedName("shipblock").setRegistryName(MODID, "shipblock").setCreativeTab(vwTab);
-		physicsInfuserCreative = new BlockPhysicsInfuserCreative(Material.ROCK).setHardness(12f).setUnlocalizedName("shipblockcreative").setRegistryName(MODID, "shipblockcreative").setCreativeTab(vwTab);
-		
-		registerBlock(physicsInfuser);
-		registerBlock(physicsInfuserCreative);
-	}
-	
-	private void registerRecipies(FMLStateEvent event) {
-		GameRegistry.addRecipe(new ItemStack(physicsInfuser), "IEI", "ODO", "IEI", 'E', Items.ENDER_PEARL, 'D', Items.DIAMOND, 'O', Item.getItemFromBlock(Blocks.OBSIDIAN), 'I', Items.IRON_INGOT);
+	public void registerRecipies() {
+		GameRegistry.addShapedRecipe(new ResourceLocation(MODID, "crafting_physicsinfuser"), null, new ItemStack(physicsInfuser), "IEI", "ODO", "IEI", 'E', Items.ENDER_PEARL, 'D', Items.DIAMOND, 'O', Item.getItemFromBlock(Blocks.OBSIDIAN), 'I', Items.IRON_INGOT);
 	}
 	
 	private void runConfiguration(FMLPreInitializationEvent event) {

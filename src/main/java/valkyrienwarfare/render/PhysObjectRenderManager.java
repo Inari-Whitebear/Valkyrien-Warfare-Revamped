@@ -1,3 +1,18 @@
+/*
+ * Adapted from the Wizardry License
+ *
+ * Copyright (c) 2016-2017 the Valkyrien Warfare team
+ *
+ * Permission is hereby granted to any persons and/or organizations using this software to copy, modify, merge, publish, and distribute it.
+ * Said persons and/or organizations are not allowed to use the software or any derivatives of the work for commercial use or any other means to generate income unless it is to be used as a part of a larger project (IE: "modpacks"), nor are they allowed to claim this software as their own.
+ *
+ * The persons and/or organizations are also disallowed from sub-licensing and/or trademarking this software without explicit permission from the Valkyrien Warfare team.
+ *
+ * Any persons and/or organizations using this software must disclose their source code and have it publicly available, include this license, provide sufficient credit to the original authors of the project (IE: The Valkyrien Warfare team), as well as provide a link to the original project.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 package valkyrienwarfare.render;
 
 import valkyrienwarfare.api.RotationMatrices;
@@ -132,7 +147,7 @@ public class PhysObjectRenderManager {
 			TileEntity tileEnt = parent.worldObj.getTileEntity(pos);
 			if (tileEnt != null) {
 				try {
-					TileEntityRendererDispatcher.instance.renderTileEntity(tileEnt, partialTicks, -1);
+					TileEntityRendererDispatcher.instance.render(tileEnt, partialTicks, -1);
 				} catch (Exception e) {
 					// e.printStackTrace();
 				}
@@ -141,7 +156,7 @@ public class PhysObjectRenderManager {
 	}
 	
 	public boolean shouldRender() {
-		ICamera camera = ((ClientProxy) ValkyrienWarfareMod.proxy).lastCamera;
+		ICamera camera = ClientProxy.lastCamera;
 		return camera == null || camera.isBoundingBoxInFrustum(parent.collisionBB);
 	}
 	
@@ -166,9 +181,9 @@ public class PhysObjectRenderManager {
 
 //		System.out.println(entity.roll - entity.prevRoll);
 		
-		double p0 = Minecraft.getMinecraft().player.lastTickPosX + (Minecraft.getMinecraft().player.posX - Minecraft.getMinecraft().player.lastTickPosX) * (double) partialTicks;
-		double p1 = Minecraft.getMinecraft().player.lastTickPosY + (Minecraft.getMinecraft().player.posY - Minecraft.getMinecraft().player.lastTickPosY) * (double) partialTicks;
-		double p2 = Minecraft.getMinecraft().player.lastTickPosZ + (Minecraft.getMinecraft().player.posZ - Minecraft.getMinecraft().player.lastTickPosZ) * (double) partialTicks;
+		double p0 = Minecraft.getMinecraft().player.lastTickPosX + (Minecraft.getMinecraft().player.posX - Minecraft.getMinecraft().player.lastTickPosX) * partialTicks;
+		double p1 = Minecraft.getMinecraft().player.lastTickPosY + (Minecraft.getMinecraft().player.posY - Minecraft.getMinecraft().player.lastTickPosY) * partialTicks;
+		double p2 = Minecraft.getMinecraft().player.lastTickPosZ + (Minecraft.getMinecraft().player.posZ - Minecraft.getMinecraft().player.lastTickPosZ) * partialTicks;
 		
 		Quaternion smoothRotation = getSmoothRotationQuat(partialTicks);
 		double[] radians = smoothRotation.toRadians();
@@ -213,9 +228,9 @@ public class PhysObjectRenderManager {
 		double moddedX = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * partialTicks;
 		double moddedY = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * partialTicks;
 		double moddedZ = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * partialTicks;
-		double p0 = Minecraft.getMinecraft().player.lastTickPosX + (Minecraft.getMinecraft().player.posX - Minecraft.getMinecraft().player.lastTickPosX) * (double) partialTicks;
-		double p1 = Minecraft.getMinecraft().player.lastTickPosY + (Minecraft.getMinecraft().player.posY - Minecraft.getMinecraft().player.lastTickPosY) * (double) partialTicks;
-		double p2 = Minecraft.getMinecraft().player.lastTickPosZ + (Minecraft.getMinecraft().player.posZ - Minecraft.getMinecraft().player.lastTickPosZ) * (double) partialTicks;
+		double p0 = Minecraft.getMinecraft().player.lastTickPosX + (Minecraft.getMinecraft().player.posX - Minecraft.getMinecraft().player.lastTickPosX) * partialTicks;
+		double p1 = Minecraft.getMinecraft().player.lastTickPosY + (Minecraft.getMinecraft().player.posY - Minecraft.getMinecraft().player.lastTickPosY) * partialTicks;
+		double p2 = Minecraft.getMinecraft().player.lastTickPosZ + (Minecraft.getMinecraft().player.posZ - Minecraft.getMinecraft().player.lastTickPosZ) * partialTicks;
 		
 		Quaternion smoothRotation = getSmoothRotationQuat(partialTicks);
 		double[] radians = smoothRotation.toRadians();

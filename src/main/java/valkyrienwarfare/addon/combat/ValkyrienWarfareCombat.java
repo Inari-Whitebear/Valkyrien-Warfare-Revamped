@@ -1,5 +1,21 @@
+/*
+ * Adapted from the Wizardry License
+ *
+ * Copyright (c) 2016-2017 the Valkyrien Warfare team
+ *
+ * Permission is hereby granted to any persons and/or organizations using this software to copy, modify, merge, publish, and distribute it.
+ * Said persons and/or organizations are not allowed to use the software or any derivatives of the work for commercial use or any other means to generate income unless it is to be used as a part of a larger project (IE: "modpacks"), nor are they allowed to claim this software as their own.
+ *
+ * The persons and/or organizations are also disallowed from sub-licensing and/or trademarking this software without explicit permission from the Valkyrien Warfare team.
+ *
+ * Any persons and/or organizations using this software must disclose their source code and have it publicly available, include this license, provide sufficient credit to the original authors of the project (IE: The Valkyrien Warfare team), as well as provide a link to the original project.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 package valkyrienwarfare.addon.combat;
 
+import net.minecraftforge.event.RegistryEvent;
 import valkyrienwarfare.api.addons.Module;
 import valkyrienwarfare.api.addons.VWAddon;
 import valkyrienwarfare.ValkyrienWarfareMod;
@@ -26,7 +42,7 @@ public class ValkyrienWarfareCombat extends Module<ValkyrienWarfareCombat> {
 	public static ValkyrienWarfareCombat INSTANCE;
 	
 	public ValkyrienWarfareCombat()  {
-		super("VW_Combat", new CommonProxyCombat(), new ClientProxyCombat(), null, "valkyrienwarfarecombat");
+		super("VW_Combat", new CommonProxyCombat(), new ClientProxyCombat(), null);
 		INSTANCE = this;
 	}
 
@@ -39,6 +55,12 @@ public class ValkyrienWarfareCombat extends Module<ValkyrienWarfareCombat> {
 
 	@Override
 	public void preInit(FMLStateEvent event) {
+		basicCannonSpawner = new ItemBasicCannon().setUnlocalizedName("basiccannonspawner").setRegistryName(getModID(), "basiccannonspawner").setCreativeTab(ValkyrienWarfareMod.vwTab).setMaxStackSize(4);
+		cannonBall = new ItemCannonBall().setUnlocalizedName("turretcannonball").setRegistryName(getModID(), "turretcannonball").setCreativeTab(ValkyrienWarfareMod.vwTab).setMaxStackSize(32);
+		powderPouch = new ItemPowderPouch().setUnlocalizedName("powderpouch").setRegistryName(getModID(), "powderpouch").setCreativeTab(ValkyrienWarfareMod.vwTab).setMaxStackSize(32);
+		explosiveArrow = new ItemExplosiveArrow().setUnlocalizedName("explosivearrow").setRegistryName(getModID(), "explosivearrow").setCreativeTab(ValkyrienWarfareMod.vwTab).setMaxStackSize(64);
+		
+		fakecannonblock = new FakeCannonBlock(Material.IRON).setHardness(5f).setUnlocalizedName("fakecannonblock").setRegistryName(getModID(), "fakecannonblock");
 	}
 
 	@Override
@@ -50,16 +72,8 @@ public class ValkyrienWarfareCombat extends Module<ValkyrienWarfareCombat> {
 	}
 
 	@Override
-	protected void registerItems() {
-		basicCannonSpawner = new ItemBasicCannon().setUnlocalizedName("basiccannonspawner").setRegistryName(getModID(), "basiccannonspawner").setCreativeTab(ValkyrienWarfareMod.vwTab).setMaxStackSize(4);
-		cannonBall = new ItemCannonBall().setUnlocalizedName("turretcannonball").setRegistryName(getModID(), "turretcannonball").setCreativeTab(ValkyrienWarfareMod.vwTab).setMaxStackSize(32);
-		powderPouch = new ItemPowderPouch().setUnlocalizedName("powderpouch").setRegistryName(getModID(), "powderpouch").setCreativeTab(ValkyrienWarfareMod.vwTab).setMaxStackSize(32);
-		explosiveArrow = new ItemExplosiveArrow().setUnlocalizedName("explosivearrow").setRegistryName(getModID(), "explosivearrow").setCreativeTab(ValkyrienWarfareMod.vwTab).setMaxStackSize(64);
-
-		GameRegistry.register(basicCannonSpawner);
-		GameRegistry.register(cannonBall);
-		GameRegistry.register(powderPouch);
-		GameRegistry.register(explosiveArrow);
+	public void registerItems(RegistryEvent.Register<Item> event) {
+		event.getRegistry().registerAll(basicCannonSpawner, cannonBall, powderPouch, explosiveArrow);
 	}
 	
 	@Override
@@ -69,16 +83,13 @@ public class ValkyrienWarfareCombat extends Module<ValkyrienWarfareCombat> {
 	}
 	
 	@Override
-	protected void registerBlocks() {
-		fakecannonblock = new FakeCannonBlock(Material.IRON).setHardness(5f).setUnlocalizedName("fakecannonblock").setRegistryName(getModID(), "fakecannonblock");
-
-		GameRegistry.register(fakecannonblock);
+	public void registerBlocks(RegistryEvent.Register<Block> event) {
+		event.getRegistry().registerAll(fakecannonblock);
 	}
 	
 	@Override
-	protected void registerRecipes() {
-		GameRegistry.addRecipe(new ItemStack(cannonBall, 4), new Object[]{"II ", "II ", "   ", 'I', Items.IRON_INGOT});
-		GameRegistry.addRecipe(new ItemStack(powderPouch, 4), new Object[]{" S ", "SGS", " S ", 'S', Items.STRING, 'G', Items.GUNPOWDER});
+	public void registerRecipes() {
+		GameRegistry.addShapedRecipe(new ResourceLocation(getModID(), "crafting_cannonball"), null, new ItemStack(cannonBall, 4), "II ", "II ", "   ", 'I', Items.IRON_INGOT);
+		GameRegistry.addShapedRecipe(new ResourceLocation(getModID(), "crafting_pouderpouch"), null, new ItemStack(powderPouch, 4), " S ", "SGS", " S ", 'S', Items.STRING, 'G', Items.GUNPOWDER);
 	}
-
 }

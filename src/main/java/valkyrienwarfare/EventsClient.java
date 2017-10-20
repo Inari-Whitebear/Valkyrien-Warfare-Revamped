@@ -1,3 +1,18 @@
+/*
+ * Adapted from the Wizardry License
+ *
+ * Copyright (c) 2016-2017 the Valkyrien Warfare team
+ *
+ * Permission is hereby granted to any persons and/or organizations using this software to copy, modify, merge, publish, and distribute it.
+ * Said persons and/or organizations are not allowed to use the software or any derivatives of the work for commercial use or any other means to generate income unless it is to be used as a part of a larger project (IE: "modpacks"), nor are they allowed to claim this software as their own.
+ *
+ * The persons and/or organizations are also disallowed from sub-licensing and/or trademarking this software without explicit permission from the Valkyrien Warfare team.
+ *
+ * Any persons and/or organizations using this software must disclose their source code and have it publicly available, include this license, provide sufficient credit to the original authors of the project (IE: The Valkyrien Warfare team), as well as provide a link to the original project.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 package valkyrienwarfare;
 
 import valkyrienwarfare.api.RotationMatrices;
@@ -11,7 +26,7 @@ import valkyrienwarfare.physicsmanagement.WorldPhysObjectManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.VertexBuffer;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -91,33 +106,6 @@ public class EventsClient {
 				}
 			}
 		}
-		
-	}
-	
-	@SubscribeEvent(priority = EventPriority.HIGHEST)
-	public void onCameraSetup(CameraSetup event) {
-		
-	}
-	
-	@SubscribeEvent
-	public void onChunkLoadClient(ChunkEvent.Load event) {
-		
-	}
-	
-	@SubscribeEvent
-	public void onChunkUnloadClient(ChunkEvent.Unload event) {
-		
-	}
-	
-	@SubscribeEvent
-	public void onRenderTickEvent(RenderTickEvent event) {
-		if (mc.player != null && mc.playerController != null) {
-			// if(!(mc.playerController instanceof CustomPlayerControllerMP)){
-			// PlayerControllerMP oldController = mc.playerController;
-			// mc.playerController = new CustomPlayerControllerMP(mc, mc.getConnection());
-			// mc.playerController.setGameType(oldController.getCurrentGameType());
-			// }
-		}
 	}
 	
 	@SubscribeEvent(priority = EventPriority.HIGHEST, receiveCanceled = true)
@@ -129,7 +117,7 @@ public class EventsClient {
 			if (wrapper != null && wrapper.wrapping != null && wrapper.wrapping.renderer != null && wrapper.wrapping.centerCoord != null) {
 				RayTraceResult objectOver = Minecraft.getMinecraft().objectMouseOver;
 				if (objectOver != null && objectOver.hitVec != null) {
-					VertexBuffer buffer = Tessellator.getInstance().getBuffer();
+					BufferBuilder buffer = Tessellator.getInstance().getBuffer();
 					oldXOff = buffer.xOffset;
 					oldYOff = buffer.yOffset;
 					oldZOff = buffer.zOffset;
@@ -151,7 +139,7 @@ public class EventsClient {
 			if (wrapper != null && wrapper.wrapping != null && wrapper.wrapping.renderer != null && wrapper.wrapping.centerCoord != null) {
 				RayTraceResult objectOver = Minecraft.getMinecraft().objectMouseOver;
 				if (objectOver != null && objectOver.hitVec != null) {
-					VertexBuffer buffer = Tessellator.getInstance().getBuffer();
+					BufferBuilder buffer = Tessellator.getInstance().getBuffer();
 					buffer.xOffset = oldXOff;
 					buffer.yOffset = oldYOff;
 					buffer.zOffset = oldZOff;
@@ -161,13 +149,5 @@ public class EventsClient {
 			}
 		}
 		GL11.glPopMatrix();
-	}
-	
-	@SubscribeEvent
-	public void interaction(final LeftClickBlock event) {
-//		System.out.println(event.getHitVec());
-//		if(event.getUseItem() == Result.DENY) {
-//			System.out.println("wtf");
-//		}
 	}
 }

@@ -1,3 +1,18 @@
+/*
+ * Adapted from the Wizardry License
+ *
+ * Copyright (c) 2016-2017 the Valkyrien Warfare team
+ *
+ * Permission is hereby granted to any persons and/or organizations using this software to copy, modify, merge, publish, and distribute it.
+ * Said persons and/or organizations are not allowed to use the software or any derivatives of the work for commercial use or any other means to generate income unless it is to be used as a part of a larger project (IE: "modpacks"), nor are they allowed to claim this software as their own.
+ *
+ * The persons and/or organizations are also disallowed from sub-licensing and/or trademarking this software without explicit permission from the Valkyrien Warfare team.
+ *
+ * Any persons and/or organizations using this software must disclose their source code and have it publicly available, include this license, provide sufficient credit to the original authors of the project (IE: The Valkyrien Warfare team), as well as provide a link to the original project.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 package valkyrienwarfare.mixin.world;
 
 import valkyrienwarfare.api.RotationMatrices;
@@ -31,34 +46,34 @@ public abstract class MixinExplosion {
 
 	@Shadow
 	@Final
-	public float explosionSize;
+	public float size;
 
 	@Shadow
 	@Final
-	public double explosionX;
+	public double x;
 
 	@Shadow
 	@Final
-	public double explosionY;
+	public double y;
 
 	@Shadow
 	@Final
-	public double explosionZ;
+	public double z;
 
 	{
 //        world = null;
 //        explosionSize = 0;
-//        explosionX = 0;
-//        explosionY = 0;
-//        explosionZ = 0;
+//        x = 0;
+//        y = 0;
+//        z = 0;
 		//dirty hack lol
 	}
 
 	@Inject(method = "doExplosionA", at = @At("RETURN"))
 	public void postExplosionA(CallbackInfo callbackInfo) {
-		Vector center = new Vector(this.explosionX, this.explosionY, this.explosionZ);
+		Vector center = new Vector(this.x, this.y, this.z);
 		World worldIn = this.world;
-		float radius = this.explosionSize;
+		float radius = this.size;
 
 		AxisAlignedBB toCheck = new AxisAlignedBB(center.X - radius, center.Y - radius, center.Z - radius, center.X + radius, center.Y + radius, center.Z + radius);
 		List<PhysicsWrapperEntity> shipsNear = ValkyrienWarfareMod.physicsManager.getManagerForWorld(this.world).getNearbyPhysObjects(toCheck);
@@ -73,9 +88,9 @@ public abstract class MixinExplosion {
 
 			boolean cancelDueToWater = false;
 
-			for (int x = (int) Math.floor(expl.explosionX - waterRange); x <= Math.ceil(expl.explosionX + waterRange); x++) {
-				for (int y = (int) Math.floor(expl.explosionY - waterRange); y <= Math.ceil(expl.explosionY + waterRange); y++) {
-					for (int z = (int) Math.floor(expl.explosionZ - waterRange); z <= Math.ceil(expl.explosionZ + waterRange); z++) {
+			for (int x = (int) Math.floor(expl.x - waterRange); x <= Math.ceil(expl.x + waterRange); x++) {
+				for (int y = (int) Math.floor(expl.y - waterRange); y <= Math.ceil(expl.y + waterRange); y++) {
+					for (int z = (int) Math.floor(expl.z - waterRange); z <= Math.ceil(expl.z + waterRange); z++) {
 						if (!cancelDueToWater) {
 							IBlockState state = this.world.getBlockState(new BlockPos(x, y, z));
 							if (state.getBlock() instanceof BlockLiquid) {
@@ -107,7 +122,7 @@ public abstract class MixinExplosion {
 					Block block = state.getBlock();
 					if (!block.isAir(state, worldIn, (BlockPos) o) || ship.wrapping.explodedPositionsThisTick.contains(o)) {
 						if (block.canDropFromExplosion(expl)) {
-							block.dropBlockAsItemWithChance(ship.world, pos, state, 1.0F / expl.explosionSize, 0);
+							block.dropBlockAsItemWithChance(ship.world, pos, state, 1.0F / expl.size, 0);
 						}
 						block.onBlockExploded(ship.world, pos, expl);
 						if (!worldIn.isRemote) {
@@ -117,9 +132,9 @@ public abstract class MixinExplosion {
 
 							double mass = BlockMass.basicMass.getMassFromState(state, pos, ship.world);
 
-							double explosionForce = Math.sqrt(this.explosionSize) * 1000D * mass;
+							double explosionForce = Math.sqrt(this.size) * 1000D * mass;
 
-							Vector forceVector = new Vector(pos.getX() + .5 - expl.explosionX, pos.getY() + .5 - expl.explosionY, pos.getZ() + .5 - expl.explosionZ);
+							Vector forceVector = new Vector(pos.getX() + .5 - expl.x, pos.getY() + .5 - expl.y, pos.getZ() + .5 - expl.z);
 
 							double vectorDist = forceVector.length();
 

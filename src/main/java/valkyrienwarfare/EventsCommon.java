@@ -1,7 +1,33 @@
+/*
+ * Adapted from the Wizardry License
+ *
+ * Copyright (c) 2016-2017 the Valkyrien Warfare team
+ *
+ * Permission is hereby granted to any persons and/or organizations using this software to copy, modify, merge, publish, and distribute it.
+ * Said persons and/or organizations are not allowed to use the software or any derivatives of the work for commercial use or any other means to generate income unless it is to be used as a part of a larger project (IE: "modpacks"), nor are they allowed to claim this software as their own.
+ *
+ * The persons and/or organizations are also disallowed from sub-licensing and/or trademarking this software without explicit permission from the Valkyrien Warfare team.
+ *
+ * Any persons and/or organizations using this software must disclose their source code and have it publicly available, include this license, provide sufficient credit to the original authors of the project (IE: The Valkyrien Warfare team), as well as provide a link to the original project.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 package valkyrienwarfare;
 
+import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemBlock;
+import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.item.crafting.ShapedRecipes;
+import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.fml.common.Mod;
 import valkyrienwarfare.api.RotationMatrices;
 import valkyrienwarfare.api.Vector;
+import valkyrienwarfare.api.addons.Module;
+import valkyrienwarfare.block.BlockPhysicsInfuser;
+import valkyrienwarfare.block.BlockPhysicsInfuserCreative;
 import valkyrienwarfare.capability.IAirshipCounterCapability;
 import valkyrienwarfare.interaction.ValkyrienWarfareWorldEventListener;
 import valkyrienwarfare.mixin.MixinLoaderForge;
@@ -58,6 +84,9 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.logging.Level;
 
+import static valkyrienwarfare.ValkyrienWarfareMod.*;
+
+@Mod.EventBusSubscriber
 public class EventsCommon {
 	
 	public static HashMap<EntityPlayerMP, Double[]> lastPositions = new HashMap<EntityPlayerMP, Double[]>();
@@ -67,13 +96,13 @@ public class EventsCommon {
 			Field xField, yField, zField, positionField;
 			
 			if (!MixinLoaderForge.isObfuscatedEnvironment) {
-				xField = toSet.getClass().getDeclaredField("explosionX");
+				xField = toSet.getClass().getDeclaredField("x");
 				xField.setAccessible(true);
 				
-				yField = toSet.getClass().getDeclaredField("explosionY");
+				yField = toSet.getClass().getDeclaredField("y");
 				yField.setAccessible(true);
 				
-				zField = toSet.getClass().getDeclaredField("explosionZ");
+				zField = toSet.getClass().getDeclaredField("z");
 				zField.setAccessible(true);
 				
 				positionField = toSet.getClass().getDeclaredField("position");
@@ -105,15 +134,15 @@ public class EventsCommon {
 		try {
 			Field xField = fields[0], yField = fields[1], zField = fields[2], positionField = fields[3];
 			
-			double testX = toSet.explosionX;
+			double testX = toSet.x;
 			
 			xField.setDouble(toSet, x);
 			
-			double testY = toSet.explosionY;
+			double testY = toSet.y;
 			
 			yField.setDouble(toSet, y);
 			
-			double testZ = toSet.explosionZ;
+			double testZ = toSet.z;
 			
 			zField.setDouble(toSet, z);
 			
@@ -270,11 +299,11 @@ public class EventsCommon {
 	 * public void onExplosionDetonateEvent(ExplosionEvent.Detonate event) {
 	 * Explosion e = event.getExplosion();
 	 * <p>
-	 * double xx = e.explosionX, yy = e.explosionY, zz = e.explosionZ;
+	 * double xx = e.x, yy = e.y, zz = e.z;
 	 * List<BlockPos> affectedPositionsList = new ArrayList<BlockPos>(e.getAffectedBlockPositions());
 	 * Map<EntityPlayer, Vec3d> playerKnockbackMap = new HashMap<EntityPlayer, Vec3d>(e.getPlayerKnockbackMap());
 	 * <p>
-	 * Vector center = new Vector(e.explosionX, e.explosionY, e.explosionZ);
+	 * Vector center = new Vector(e.x, e.y, e.z);
 	 * World worldIn = e.worldObj;
 	 * float radius = e.explosionSize;
 	 * <p>
@@ -299,9 +328,9 @@ public class EventsCommon {
 	 * <p>
 	 * boolean cancelDueToWater = false;
 	 * <p>
-	 * for (int x = (int) math.floor(expl.explosionX - waterRange); x <= math.ceil(expl.explosionX + waterRange); x++) {
-	 * for (int y = (int) math.floor(expl.explosionY - waterRange); y <= math.ceil(expl.explosionY + waterRange); y++) {
-	 * for (int z = (int) math.floor(expl.explosionZ - waterRange); z <= math.ceil(expl.explosionZ + waterRange); z++) {
+	 * for (int x = (int) math.floor(expl.x - waterRange); x <= math.ceil(expl.x + waterRange); x++) {
+	 * for (int y = (int) math.floor(expl.y - waterRange); y <= math.ceil(expl.y + waterRange); y++) {
+	 * for (int z = (int) math.floor(expl.z - waterRange); z <= math.ceil(expl.z + waterRange); z++) {
 	 * if (!cancelDueToWater) {
 	 * IBlockState state = e.worldObj.getBlockState(new BlockPos(x, y, z));
 	 * if (state.getBlock() instanceof BlockLiquid) {
@@ -345,7 +374,7 @@ public class EventsCommon {
 	 * <p>
 	 * double explosionForce = math.sqrt(e.explosionSize) * 1000D * mass;
 	 * <p>
-	 * Vector forceVector = new Vector(pos.getX() + .5 - expl.explosionX, pos.getY() + .5 - expl.explosionY, pos.getZ() + .5 - expl.explosionZ);
+	 * Vector forceVector = new Vector(pos.getX() + .5 - expl.x, pos.getY() + .5 - expl.y, pos.getZ() + .5 - expl.z);
 	 * <p>
 	 * double vectorDist = forceVector.length();
 	 * <p>
@@ -450,7 +479,7 @@ public class EventsCommon {
 	@SubscribeEvent
 	public void onEntityConstruct(AttachCapabilitiesEvent evt) {
 		if (evt.getObject() instanceof EntityPlayer) {
-			evt.addCapability(new ResourceLocation(ValkyrienWarfareMod.MODID, "AirshipCounter"), new ICapabilitySerializable<NBTTagIntArray>() {
+			evt.addCapability(new ResourceLocation(MODID, "AirshipCounter"), new ICapabilitySerializable<NBTTagIntArray>() {
 				IAirshipCounterCapability inst = ValkyrienWarfareMod.airshipCounter.getDefaultInstance();
 				
 				@Override
@@ -506,7 +535,7 @@ public class EventsCommon {
 	@SubscribeEvent
 	public void onLeave(PlayerLoggedOutEvent event) {
 		if (!event.player.world.isRemote) {
-			lastPositions.remove((EntityPlayerMP) event.player);
+			lastPositions.remove(event.player);
 		}
 	}
 	
@@ -563,4 +592,35 @@ public class EventsCommon {
 		}
 	}
 	
+	@SubscribeEvent
+	public void registerItems(RegistryEvent.Register<Item> event)   {
+		for (Module module : ValkyrienWarfareMod.addons)    {
+			module.registerItems(event);
+		}
+		
+		registerItemBlock(physicsInfuser, event);
+		registerItemBlock(physicsInfuserCreative, event);
+	}
+	
+	private static void registerItemBlock(Block block, RegistryEvent.Register<Item> event) {
+		event.getRegistry().register(new ItemBlock(block).setUnlocalizedName(block.getUnlocalizedName()).setRegistryName(block.getRegistryName()));
+	}
+	
+	@SubscribeEvent
+	public void registerBlocks(RegistryEvent.Register<Block> event)   {
+		for (Module module : ValkyrienWarfareMod.addons)    {
+			module.registerBlocks(event);
+		}
+		
+		event.getRegistry().registerAll(physicsInfuserCreative, physicsInfuser);
+	}
+	
+	@SubscribeEvent
+	public void registerRecipes(RegistryEvent.Register<IRecipe> event)   {
+		for (Module module : ValkyrienWarfareMod.addons)    {
+			module.registerRecipes();
+		}
+		
+		ValkyrienWarfareMod.INSTANCE.registerRecipies();
+	}
 }

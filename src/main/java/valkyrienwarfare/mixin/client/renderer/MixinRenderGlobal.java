@@ -1,10 +1,20 @@
+/*
+ * Adapted from the Wizardry License
+ *
+ * Copyright (c) 2016-2017 the Valkyrien Warfare team
+ *
+ * Permission is hereby granted to any persons and/or organizations using this software to copy, modify, merge, publish, and distribute it.
+ * Said persons and/or organizations are not allowed to use the software or any derivatives of the work for commercial use or any other means to generate income unless it is to be used as a part of a larger project (IE: "modpacks"), nor are they allowed to claim this software as their own.
+ *
+ * The persons and/or organizations are also disallowed from sub-licensing and/or trademarking this software without explicit permission from the Valkyrien Warfare team.
+ *
+ * Any persons and/or organizations using this software must disclose their source code and have it publicly available, include this license, provide sufficient credit to the original authors of the project (IE: The Valkyrien Warfare team), as well as provide a link to the original project.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 package valkyrienwarfare.mixin.client.renderer;
 
-import valkyrienwarfare.api.RotationMatrices;
-import valkyrienwarfare.api.Vector;
-import valkyrienwarfare.physicsmanagement.PhysicsWrapperEntity;
-import valkyrienwarfare.proxy.ClientProxy;
-import valkyrienwarfare.ValkyrienWarfareMod;
 import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -33,6 +43,11 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import valkyrienwarfare.ValkyrienWarfareMod;
+import valkyrienwarfare.api.RotationMatrices;
+import valkyrienwarfare.api.Vector;
+import valkyrienwarfare.physicsmanagement.PhysicsWrapperEntity;
+import valkyrienwarfare.proxy.ClientProxy;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -70,7 +85,7 @@ public abstract class MixinRenderGlobal {
 	public abstract void postRenderDamagedBlocks();
 	
 	@Overwrite
-	public void drawBlockDamageTexture(Tessellator tessellatorIn, VertexBuffer worldRendererIn, Entity entityIn, float partialTicks) {
+	public void drawBlockDamageTexture(Tessellator tessellatorIn, BufferBuilder worldRendererIn, Entity entityIn, float partialTicks) {
 		double d0 = entityIn.lastTickPosX + (entityIn.posX - entityIn.lastTickPosX) * (double) partialTicks;
 		double d1 = entityIn.lastTickPosY + (entityIn.posY - entityIn.lastTickPosY) * (double) partialTicks;
 		double d2 = entityIn.lastTickPosZ + (entityIn.posZ - entityIn.lastTickPosZ) * (double) partialTicks;
@@ -143,21 +158,21 @@ public abstract class MixinRenderGlobal {
 			movingObjectPositionIn = Minecraft.getMinecraft().objectMouseOver;
 			
 			Tessellator tessellator = Tessellator.getInstance();
-			VertexBuffer vertexbuffer = tessellator.getBuffer();
+			BufferBuilder BufferBuilder = tessellator.getBuffer();
 			
 			double xOff = (player.lastTickPosX + (player.posX - player.lastTickPosX) * (double) partialTicks) - wrapper.wrapping.renderer.offsetPos.getX();
 			double yOff = (player.lastTickPosY + (player.posY - player.lastTickPosY) * (double) partialTicks) - wrapper.wrapping.renderer.offsetPos.getY();
 			double zOff = (player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * (double) partialTicks) - wrapper.wrapping.renderer.offsetPos.getZ();
 			
-			vertexbuffer.xOffset += xOff;
-			vertexbuffer.yOffset += yOff;
-			vertexbuffer.zOffset += zOff;
+			BufferBuilder.xOffset += xOff;
+			BufferBuilder.yOffset += yOff;
+			BufferBuilder.zOffset += zOff;
 			
 			this.drawSelectionBoxOriginal(player, movingObjectPositionIn, execute, partialTicks);
 			
-			vertexbuffer.xOffset -= xOff;
-			vertexbuffer.yOffset -= yOff;
-			vertexbuffer.zOffset -= zOff;
+			BufferBuilder.xOffset -= xOff;
+			BufferBuilder.yOffset -= yOff;
+			BufferBuilder.zOffset -= zOff;
 			
 			wrapper.wrapping.renderer.inverseTransform(partialTicks);
 		} else {
@@ -179,7 +194,7 @@ public abstract class MixinRenderGlobal {
 				double d0 = player.lastTickPosX + (player.posX - player.lastTickPosX) * (double) partialTicks;
 				double d1 = player.lastTickPosY + (player.posY - player.lastTickPosY) * (double) partialTicks;
 				double d2 = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * (double) partialTicks;
-				drawSelectionBoundingBox(iblockstate.getSelectedBoundingBox(this.world, blockpos).expandXyz(0.0020000000949949026D).offset(-d0, -d1, -d2), 0.0F, 0.0F, 0.0F, 0.4F);
+				drawSelectionBoundingBox(iblockstate.getSelectedBoundingBox(this.world, blockpos).expand(0.0020000000949949026D, 0.0020000000949949026D, 0.0020000000949949026D).offset(-d0, -d1, -d2), 0.0F, 0.0F, 0.0F, 0.4F);
 			}
 			
 			GlStateManager.depthMask(true);
@@ -245,21 +260,21 @@ public abstract class MixinRenderGlobal {
 	}
 	
 	@Overwrite
-	public Particle spawnEntityFX(int particleID, boolean ignoreRange, double xCoord, double yCoord, double zCoord, double xSpeed, double ySpeed, double zSpeed, int... parameters) {
+	public void spawnParticle(int id, boolean ignoreRange, boolean p_190570_3_, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed, int... parameters) {
 		if (ValkyrienWarfareMod.shipsSpawnParticles) {
-			BlockPos particlePos = new BlockPos(xCoord, yCoord, zCoord);
+			BlockPos particlePos = new BlockPos(x, y, z);
 			PhysicsWrapperEntity wrapper = ValkyrienWarfareMod.physicsManager.getObjectManagingPos(this.world, particlePos);
 			if (wrapper != null) {
-				Vector newCoords = new Vector(xCoord, yCoord, zCoord);
+				Vector newCoords = new Vector(x, y, z);
 				RotationMatrices.applyTransform(wrapper.wrapping.coordTransform.lToWTransform, newCoords);
 				
-				xCoord = newCoords.X;
-				yCoord = newCoords.Y;
-				zCoord = newCoords.Z;
+				x = newCoords.X;
+				y = newCoords.Y;
+				z = newCoords.Z;
 			}
 		}
 		//vanilla code follows
-		return this.spawnParticle0(particleID, ignoreRange, false, xCoord, yCoord, zCoord, xSpeed, ySpeed, zSpeed, parameters);
+		this.spawnParticle0(id, ignoreRange, p_190570_3_, x, y, z, xSpeed, ySpeed, zSpeed, parameters);
 	}
 	
 	@Shadow
